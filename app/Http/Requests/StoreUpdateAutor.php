@@ -23,7 +23,7 @@ class StoreUpdateAutor extends FormRequest
     {
         return [
             'nome' => 'required|min:2|max:70',
-            'data_de_nascimento' => 'required|date',
+            'data_nascimento' => 'required|date',
             'nacionalidade' => 'required|string|min:2|max:50',
             'email' => 'required|email|max:100',
             'genero' => 'required|string|min:2|max:30',
