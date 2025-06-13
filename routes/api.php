@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LivroController;
 use App\Http\Controllers\AutorController;
+use App\Http\Controllers\ImageController;
 
 
 Route::post('register', [AuthController::class, 'register']);

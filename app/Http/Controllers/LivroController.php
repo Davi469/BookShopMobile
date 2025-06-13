@@ -37,10 +37,10 @@ class LivroController extends Controller
         }
 
         $created = $this->livro->create([
-            'nome' => $request->input('nome'),
+            'titulo' => $request->input('titulo'),
             'autor' => $request->input('autor'),
             'editora' => $request->input('editora'),
-            'data_publicacao' => $request->input('data_publicacao'),
+            'data' => $request->input('data'),
             'categoria' => $request->input('categoria'),
             'preco' => $request->input('preco'),
             'image' => $imagePath,
@@ -77,7 +77,7 @@ class LivroController extends Controller
         $precoFormatado = str_replace(',', '.', $request->preco);
 
         $request->merge([
-            'data_publicacao' => $dataFormatada,
+            'data' => $dataFormatada,
             'preco' => $precoFormatado,
         ]);
 

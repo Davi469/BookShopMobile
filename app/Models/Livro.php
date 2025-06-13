@@ -7,14 +7,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Livro extends Model
 {
-     use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
-        'nome',
+        'titulo',
         'autor',
-        'data_publicacao',
+        'data',
         'preco',
         'editora',
         'categoria',
+        'image',
     ];
 }
