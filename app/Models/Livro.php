@@ -11,11 +11,15 @@ class Livro extends Model
 
     protected $fillable = [
         'titulo',
-        'autor',
+        'autor_id',
         'data',
         'preco',
         'editora',
         'categoria',
-        'image',
     ];
+
+    public function autor()
+{
+    return $this->belongsTo(Autor::class);
+}
 }

@@ -5,6 +5,7 @@ use App\Http\Requests\StoreUpdateLivrosCreate;
 
 use Illuminate\Http\Request;
 use App\Models\Livro;
+use Illuminate\Http\JsonResponse;
 
 use App\Http\Requests\StoreUpdateLivro;
 
@@ -17,17 +18,39 @@ class LivroController extends Controller
         $this->livro = new Livro();
     }
 
-    public function index()
+    public function index(): JsonResponse
     {
-        $livros = Livro::all();
-        return response()->json($livros);
+        $livros = Livro::with('autor')
+            ->orderBy('id')
+            ->get()
+            ->map(function ($livro) {
+                return [
+                    'id' => $livro->id,
+                    'titulo' => $livro->titulo,
+                    'categoria' => $livro->categoria,
+                    'editora' => $livro->editora,
+                    'preco' => $livro->preco,
+                    'data' => $livro->data,
+                    'autor' => [
+                        'id' => $livro->autor->id ?? null,
+                        'nome' => $livro->autor->nome ?? null,
+                    ],
+                    'created_at' => $livro->created_at,
+                    'updated_at' => $livro->updated_at,
+                ];
+            });
+
+        return response()->json([
+            'message' => $livros->isEmpty() ? 'Nenhum livro encontrado.' : 'Livros encontrados com sucesso.',
+            'data' => $livros
+        ]);
     }
 
     public function create()
     {
         return view('Create/livro_create');
     }
-    
+
     public function store(StoreUpdateLivro $request)
     {
         if ($request->hasFile('image')) {
@@ -38,12 +61,11 @@ class LivroController extends Controller
 
         $created = $this->livro->create([
             'titulo' => $request->input('titulo'),
-            'autor' => $request->input('autor'),
+            'autor_id' => $request->input('autor_id'),
             'editora' => $request->input('editora'),
             'data' => $request->input('data'),
             'categoria' => $request->input('categoria'),
             'preco' => $request->input('preco'),
-            'image' => $imagePath,
         ]);
 
         if ($created) {
@@ -69,11 +91,11 @@ class LivroController extends Controller
     {
         return view('Edit/livro_edit');
     }
-    
+
     public function update(StoreUpdateLivro $request, string $id)
     {
         $dataFormatada = \Carbon\Carbon::parse($request->data_publicacao)->format('Y-m-d');
-    
+
         $precoFormatado = str_replace(',', '.', $request->preco);
 
         $request->merge([
@@ -90,7 +112,7 @@ class LivroController extends Controller
                 'data' => $this->livro->find($id)
             ]);
         }
-        
+
         return response()->json([
             'success' => false,
             'message' => 'Erro ao atualizar!'
