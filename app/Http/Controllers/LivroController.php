@@ -6,6 +6,7 @@ use App\Http\Requests\StoreUpdateLivrosCreate;
 use Illuminate\Http\Request;
 use App\Models\Livro;
 use Illuminate\Http\JsonResponse;
+use Carbon\Carbon;
 
 use App\Http\Requests\StoreUpdateLivro;
 
@@ -30,7 +31,7 @@ class LivroController extends Controller
                     'categoria' => $livro->categoria,
                     'editora' => $livro->editora,
                     'preco' => $livro->preco,
-                    'data' => $livro->data,
+                    'data' => Carbon::parse($livro->data)->format('d/m/Y'),
                     'autor' => [
                         'id' => $livro->autor->id ?? null,
                         'nome' => $livro->autor->nome ?? null,
@@ -53,11 +54,7 @@ class LivroController extends Controller
 
     public function store(StoreUpdateLivro $request)
     {
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('livros', 'public');
-        } else {
-            $imagePath = null;
-        }
+
 
         $created = $this->livro->create([
             'titulo' => $request->input('titulo'),
@@ -72,7 +69,10 @@ class LivroController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Livro criado com sucesso!',
-                'data' => $created
+                'data' => [
+                    ...$created->toArray(),
+                    'data' => Carbon::parse($created->data)->format('d/m/Y'),
+                ]
             ]);
         }
 
@@ -94,22 +94,29 @@ class LivroController extends Controller
 
     public function update(StoreUpdateLivro $request, string $id)
     {
-        $dataFormatada = \Carbon\Carbon::parse($request->data_publicacao)->format('Y-m-d');
-
-        $precoFormatado = str_replace(',', '.', $request->preco);
-
-        $request->merge([
-            'data' => $dataFormatada,
-            'preco' => $precoFormatado,
-        ]);
 
         $updated = $this->livro->where('id', $id)->update($request->except(['_token', '_method']));
 
         if ($updated) {
+            $livro = $this->livro->with('autor')->find($id);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Livro atualizado com sucesso!',
-                'data' => $this->livro->find($id)
+                'data' => [
+                    'id' => $livro->id,
+                    'titulo' => $livro->titulo,
+                    'categoria' => $livro->categoria,
+                    'editora' => $livro->editora,
+                    'preco' => $livro->preco,
+                    'data' => Carbon::parse($livro->data)->format('d/m/Y'),
+                    'autor' => [
+                        'id' => $livro->autor->id ?? null,
+                        'nome' => $livro->autor->nome ?? null,
+                    ],
+                    'created_at' => $livro->created_at,
+                    'updated_at' => $livro->updated_at,
+                ]
             ]);
         }
 
@@ -118,7 +125,6 @@ class LivroController extends Controller
             'message' => 'Erro ao atualizar!'
         ], 400);
     }
-
     public function destroy(string $id)
     {
         $deleted = $this->livro->where('id', $id)->delete();

@@ -26,7 +26,7 @@ class StoreUpdateLivro extends FormRequest
             'autor_id' => [
                 'required',
             ],
-            'data' => ['required'],
+            'data' => 'required|date',
             'preco' => 'required',
             'editora' => 'required|string',
             'categoria' => 'required|string',
